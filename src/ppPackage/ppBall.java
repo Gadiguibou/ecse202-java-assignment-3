@@ -245,6 +245,8 @@ public class ppBall extends Thread {
       }
 
       // Pause display
+      // This had to be changed to 5ms (TICK * 5000) for the simulation to be playable with my
+      // trackpad.
       if (REAL_TIME) {
         table.getDisplay().pause(TICK * 1000);
       }
