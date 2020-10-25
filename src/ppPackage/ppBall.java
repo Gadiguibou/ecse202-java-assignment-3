@@ -81,10 +81,10 @@ public class ppBall extends Thread {
    * In a thread, the run method is NOT started automatically (like in Assignment 1). Instead, a
    * start message must be sent to each instance of the ppBall class, e.g.,
    *
-   * <p>ppBall myBall = new ppBall (--parameters--);
+   * <p><code>ppBall myBall = new ppBall (--parameters--);</code>
    *
-   * <p>myBall.start(); The body of the run method is essentially the simulator code you wrote for
-   * A1.
+   * <p><code>myBall.start();</code> The body of the run method is essentially the simulator code
+   * you wrote for A1.
    */
   public void run() {
 
@@ -130,7 +130,6 @@ public class ppBall extends Thread {
 
       // Check for collision with the ground
       if ((vy < 0) && (y0 + y <= bSize)) {
-        // TODO: turn all of this repetitive code into a function
         // Compute new ball energy
         kx = 0.5 * bMass * vx * vx * (1 - loss);
         ky = 0.5 * bMass * vy * vy * (1 - loss);
@@ -161,9 +160,10 @@ public class ppBall extends Thread {
       }
 
       // Check for collision with the paddle
-      if ((vx > 0)
-          && (x0 + x >= myPaddle.getX() - bSize - ppPaddleW / 2)
-          && myPaddle.contact(x0 + x + bSize, y0 + y + bSize)) {
+      // No collision detection is done here as this would cause weird behaviors when the paddle and
+      // the ball's collision detections were not in sync. See ppPaddle.contact() for all the
+      // collision detection now.
+      if ((vx > 0) && myPaddle.contact(x0 + x + bSize, y0 + y)) {
         // Compute new ball energy
         kx = 0.5 * bMass * vx * vx * (1 - loss);
         ky = 0.5 * bMass * vy * vy * (1 - loss);
@@ -192,6 +192,19 @@ public class ppBall extends Thread {
         if ((kx + ky + PE) < ETHR) {
           hasEnergy = false;
         }
+      } else if ((vx > 0)
+          && (x0 + x - bSize >= myPaddle.getX() + ppPaddleW / 2)
+          && !myPaddle.contact(x0 + x + bSize, y0 + y)) {
+        // If the ball is not stopped by the paddle, stop the simulation and
+        // prevent the paddle from moving.
+        myPaddle.stopPlay();
+        if (TEST) {
+          table.getDisplay().println(x0 + x - bSize);
+          table.getDisplay().println(myPaddle.getX());
+          table.getDisplay().println(y0 + y);
+          table.getDisplay().println(myPaddle.getY());
+        }
+        break;
       }
 
       // Check for collision with the left wall
@@ -244,12 +257,10 @@ public class ppBall extends Thread {
             "t: %.2f X: %.2f Y: %.2f Vx: %.2f Vy:%.2f\n", time, x0 + x, y0 + y, vx, vy);
       }
 
-      // Pause display
-      // This had to be changed to 5ms (TICK * 5000) for the simulation to be playable with my
+      // Pause display between each tick
+      // This had to be changed to 2ms (TICK * 2000) for the simulation to be playable with my
       // trackpad.
-      if (REAL_TIME) {
-        table.getDisplay().pause(TICK * 1000);
-      }
+      table.getDisplay().pause(TICK * 1000);
     }
   }
 }

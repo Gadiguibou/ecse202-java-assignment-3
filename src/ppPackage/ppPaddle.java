@@ -8,8 +8,8 @@ import java.awt.Color;
 
 /**
  * @author gabriel
- *     <p>The ppPaddle class is responsible for creating the paddle instance. It exports method that
- *     facilitate interaction with the paddle instance.
+ *     <p>The ppPaddle class is responsible for creating the paddle instance. It exports methods
+ *     that facilitate interaction with the paddle instance.
  */
 public class ppPaddle extends Thread {
   private GRect paddleRect;
@@ -24,6 +24,8 @@ public class ppPaddle extends Thread {
   private double lastY;
   // Reference to the ppTable instance.
   private ppTable myTable;
+  // Whether the player can move the paddle;
+  private boolean canPlay = true;
 
   /**
    * Initializes the ppPaddle instance and adds it to the display.
@@ -53,8 +55,9 @@ public class ppPaddle extends Thread {
     myTable.getDisplay().add(paddleRect);
   }
 
+  /** Overrides the run method of java.lang.Thread. Holds the main loop for the ppPaddle. */
   public void run() {
-    while (true) {
+    while (canPlay) {
       Vx = (X - lastX) / TICK;
       Vy = (Y - lastY) / TICK;
       lastX = X;
@@ -88,9 +91,11 @@ public class ppPaddle extends Thread {
    * @param X Specifies the new X position for the paddle.
    */
   public void setX(double X) {
-    this.X = X;
+    if (canPlay) {
+      this.X = X;
 
-    paddleRect.setLocation(myTable.toScrX(X), myTable.toScrY(Y));
+      paddleRect.setLocation(myTable.toScrX(X), myTable.toScrY(Y));
+    }
   }
 
   /**
@@ -99,9 +104,11 @@ public class ppPaddle extends Thread {
    * @param Y Specifies the new Y position for the paddle.
    */
   public void setY(double Y) {
-    this.Y = Y;
+    if (canPlay) {
+      this.Y = Y;
 
-    paddleRect.setLocation(myTable.toScrX(X), myTable.toScrY(Y));
+      paddleRect.setLocation(myTable.toScrX(X), myTable.toScrY(Y));
+    }
   }
 
   /**
@@ -148,9 +155,18 @@ public class ppPaddle extends Thread {
     // Note: This contains the collision detection for the X coordinates even though it is not
     // explicitly needed. This ensures scalability and clarity of the code as it would be weird if
     // contact() returned true when the surface is far to the left or to the right of the paddle.
+
+    // Also, this is now the only collision detection in both X and Y that is being done as having
+    // them separate made for an infuriating experience when the paddle and ball's collision
+    // detection were not in sync with each other.
     return Sy >= Y - ppPaddleH / 2
         && Sy <= Y + ppPaddleH / 2
         && Sx >= X - ppPaddleW / 2
         && Sx - 2 * bSize <= X + ppPaddleW / 2;
+  }
+
+  /** stopPlay stops the paddle from moving once it is called. */
+  public void stopPlay() {
+    canPlay = false;
   }
 }

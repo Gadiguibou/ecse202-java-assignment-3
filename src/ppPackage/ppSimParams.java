@@ -84,7 +84,7 @@ public class ppSimParams {
   // Enable print to console
   static final boolean DEBUG = false;
   // Slow down simulation to real time
-  static final boolean REAL_TIME = true;
+  static final boolean TEST = false;
   // Random number generator seed value
   static final long RSEED = 8976232;
 }
